@@ -1,5 +1,21 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const rfc = localStorage.getItem("rfcActivo");
+
+  if (!rfc) {
+    window.location.replace("index.html");
+    return;
+  }
+
+  const span = document.getElementById("rfcUsuario");
+  if (span) {
+    span.textContent = rfc;
+  }
+
+});
+
 /* =========================
    SUPABASE
 ========================= */
@@ -9,16 +25,29 @@ const supabase = createClient(
 );
 
 /* =========================
-   VALIDAR SESIÓN
+   VALIDAR SESIÓN (MEJORADO)
 ========================= */
 const { data: { session }, error: sessionError } =
   await supabase.auth.getSession();
 
 if (sessionError || !session) {
-  window.location.href = "index.html";
+  window.location.replace("index.html");
   throw new Error("Sesión no válida");
 }
 
+/* =========================
+   LOGOUT SEGURO
+========================= */
+window.logout = async function () {
+  await supabase.auth.signOut();
+
+  // Limpia historial para que no puedan volver con botón atrás
+  window.location.replace("index.html");
+};
+
+/* =========================
+   OBTENER RFC
+========================= */
 const rfc = session.user.email
   .split("@")[0]
   .trim()
@@ -207,7 +236,6 @@ window.guardarConciliacion = async function () {
   }
 
   diferenciaInput.value = nuevaDiferencia.toFixed(2);
-
   actualizarEstadoVisual(nuevaDiferencia);
 
   document.getElementById("factura").value = "";
@@ -254,28 +282,11 @@ window.generarPDF = async function () {
     doc.text("ESTADO: PENDIENTE", 20, 100);
   }
 
-  let y = 120;
-
-  doc.setTextColor(0,0,0);
-  doc.text("Historial:", 20, y);
-  y += 10;
-
-  if (data && data.length > 0) {
-    data.forEach(reg => {
-      doc.text(
-        `${reg.created_at?.substring(0,10)}  |  $${Number(reg.monto_factura).toFixed(2)}  |  Dif: $${Number(reg.diferencia).toFixed(2)}`,
-        20,
-        y
-      );
-      y += 8;
-    });
-  }
-
   doc.save("Conciliacion_" + rfc + ".pdf");
 };
 
 /* =========================
-   HISTORIAL + BLOQUEO
+   CARGAR HISTORIAL
 ========================= */
 async function cargarHistorial() {
 
