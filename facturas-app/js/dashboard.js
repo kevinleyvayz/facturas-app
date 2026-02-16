@@ -257,30 +257,156 @@ window.generarPDF = async function () {
   const saldoPrestador = saldoPrestadorInput.value;
   const diferencia = diferenciaInput.value;
 
+  const folio = "CN-" + Date.now();
+
   const { data } = await supabase
     .from("conciliacion_prestador")
     .select("*")
     .eq("rfc", rfc)
     .order("created_at", { ascending: false });
 
+  /* =========================
+     ENCABEZADO ROJO
+  ========================== */
+  doc.setFillColor(180, 0, 0);
+  doc.rect(0, 0, 210, 30, "F");
+
+  const logo = new Image();
+  logo.src = "img/logo.png";
+  await new Promise(resolve => logo.onload = resolve);
+  doc.addImage(logo, "PNG", 15, 7, 35, 15);
+
+  doc.setTextColor(255,255,255);
   doc.setFontSize(16);
-  doc.text("REPORTE DE CONCILIACIÓN", 20, 20);
+  doc.setFont("helvetica", "bold");
+  doc.text("REPORTE DE CONCILIACIÓN", 105, 18, { align: "center" });
 
+  doc.setTextColor(0,0,0);
+
+  /* =========================
+     INFO GENERAL
+  ========================== */
   doc.setFontSize(11);
-  doc.text("RFC: " + rfc, 20, 35);
-  doc.text("Fecha de generación: " + new Date().toLocaleDateString(), 20, 45);
+  doc.setFont("helvetica", "normal");
 
-  doc.text("Saldo OXXO: $" + saldoOxxo, 20, 65);
-  doc.text("Saldo Prestador: $" + saldoPrestador, 20, 75);
-  doc.text("Diferencia Final: $" + diferencia, 20, 85);
+  doc.text("Folio: " + folio, 15, 45);
+  doc.text("RFC: " + rfc, 15, 53);
+  doc.text("Fecha: " + new Date().toLocaleDateString(), 15, 61);
+
+  /* =========================
+     RESUMEN EN CAJA
+  ========================== */
+  doc.setDrawColor(200);
+  doc.rect(15, 70, 180, 35);
+
+  doc.text("Saldo OXXO: $" + saldoOxxo, 20, 82);
+  doc.text("Saldo Prestador: $" + saldoPrestador, 20, 90);
+  doc.text("Diferencia Final: $" + diferencia, 20, 98);
+
+  /* =========================
+     ESTADO GRANDE
+  ========================== */
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
 
   if (Number(diferencia) === 0) {
-    doc.setTextColor(22, 163, 74);
-    doc.text("ESTADO: CONCILIADO", 20, 100);
+    doc.setTextColor(22,163,74);
+    doc.text("ESTADO: CONCILIADO", 120, 90);
   } else {
-    doc.setTextColor(220, 38, 38);
-    doc.text("ESTADO: PENDIENTE", 20, 100);
+    doc.setTextColor(220,38,38);
+    doc.text("ESTADO: PENDIENTE", 120, 90);
   }
+
+  doc.setTextColor(0,0,0);
+
+  /* =========================
+     TABLA DETALLE
+  ========================== */
+  let y = 120;
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Detalle de Conciliaciones", 15, y);
+
+  y += 8;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  // Encabezados
+  doc.setFillColor(240);
+  doc.rect(15, y-5, 180, 8, "F");
+  doc.text("Fecha", 18, y);
+  doc.text("Factura", 55, y);
+  doc.text("Importe", 110, y);
+  doc.text("Diferencia", 150, y);
+
+  y += 10;
+
+  if (data && data.length > 0) {
+
+    data.forEach(reg => {
+
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.text(reg.created_at?.substring(0,10) || "", 18, y);
+      doc.text(reg.factura_referencia || "-", 55, y);
+      doc.text("$" + Number(reg.monto_factura || 0).toFixed(2), 110, y);
+      doc.text("$" + Number(reg.diferencia).toFixed(2), 150, y);
+
+      y += 8;
+    });
+
+  } else {
+    doc.text("No hay registros.", 18, y);
+  }
+
+  /* =========================
+     MARCA DE AGUA
+  ========================== */
+  doc.setFontSize(50);
+  doc.setTextColor(230,230,230);
+  doc.text("OXXO", 60, 200, { angle: 45 });
+
+  doc.setTextColor(0,0,0);
+
+  /* =========================
+     FIRMA SIMULADA
+  ========================== */
+  doc.setFontSize(10);
+  doc.text("_____________________________", 140, 250);
+  doc.text("Firma Autorizada", 150, 258);
+
+  /* =========================
+     QR
+  ========================== */
+  const qrData = `Folio:${folio} | RFC:${rfc} | Diferencia:${diferencia}`;
+  const qrCanvas = document.createElement("div");
+
+  new QRCode(qrCanvas, {
+    text: qrData,
+    width: 80,
+    height: 80
+  });
+
+  const qrImg = qrCanvas.querySelector("img");
+  await new Promise(resolve => qrImg.onload = resolve);
+
+  doc.addImage(qrImg, "PNG", 15, 230, 35, 35);
+
+  /* =========================
+     FOOTER
+  ========================== */
+  doc.setFontSize(8);
+  doc.text(
+    "Documento generado automáticamente por el Portal de Conciliación.",
+    105,
+    285,
+    { align: "center" }
+  );
 
   doc.save("Conciliacion_" + rfc + ".pdf");
 };
