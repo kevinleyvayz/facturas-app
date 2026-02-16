@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
+<div class="bienvenida">
+  Bienvenido, <span id="rfcUsuario"></span>
+</div>
+
 <head>
   <meta charset="UTF-8">
   <title>Portal de Prestadores</title>
 
+  <link rel="icon" type="image/png" href="img/logo.png">
+  
   <!-- Fuente -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <!-- Estilos -->
@@ -15,119 +21,144 @@
 
 <body>
 
-  <!-- HEADER -->
+  <!-- =========================
+       HEADER
+  ========================== -->
   <header class="app-header">
-    <h1>Portal de Prestadores</h1>
-    <button class="logout-btn" onclick="logout()">Salir</button>
+
+    <div class="header-left">
+      <img src="img/logo.png" alt="Logo Empresa" class="header-logo">
+      <h1>Portal de Prestadores</h1>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+
   </header>
 
+  <!-- LOADER -->
   <div id="loader" class="loader-overlay" style="display:none;">
     <div class="loader"></div>
   </div>
-  <!-- CONTENIDO -->
+
+  <!-- =========================
+       CONTENIDO
+  ========================== -->
   <main class="container">
 
     <!-- =========================
          DETALLE FACTURAS
     ========================== -->
-    <h2>Detalle de mis facturas</h2>
+    <section class="card">
+      <h2>Detalle de mis facturas</h2>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Prestador</th>
-          <th>Fecha</th>
-          <th>Factura</th>
-          <th>Importe</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-facturas"></tbody>
-    </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Prestador</th>
+            <th>Fecha</th>
+            <th>Factura</th>
+            <th>Importe</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-facturas"></tbody>
+      </table>
+    </section>
 
     <!-- =========================
          SALDOS
     ========================== -->
-    <div class="saldos">
-      <div class="saldo-box">
-        <span>Saldo OXXO</span>
-        <input type="number" id="saldo_ap" disabled>
+    <section class="card">
+
+      <h2>Resumen de saldos</h2>
+
+      <div class="dashboard-resumen">
+
+        <div class="card">
+          <h3>Saldo OXXO</h3>
+          <input type="number" id="saldo_ap" disabled>
+        </div>
+
+        <div class="card">
+          <h3>Saldo del prestador</h3>
+          <input type="number" id="saldo_prestador">
+        </div>
+
+        <div class="card">
+          <h3>Diferencia</h3>
+          <input type="number" id="diferencia" disabled>
+        </div>
+
       </div>
 
-      <div class="saldo-box">
-        <span>Saldo del prestador</span>
-        <input type="number" id="saldo_prestador">
+      <!-- Estado -->
+      <div class="estado-conciliacion">
+        <p id="mensaje-estado" class="estado"></p>
+
+        <div class="barra-container">
+          <div id="barra-progreso" class="barra-progreso"></div>
+        </div>
       </div>
 
-      <div class="saldo-box">
-        <span>Diferencia</span>
-        <input type="number" id="diferencia" disabled>
-      </div>
-    </div>
-
-    <!-- =========================
-         ESTADO VISUAL
-    ========================== -->
-
-    <div class="estado-conciliacion">
-      <p id="mensaje-estado" class="mensaje"></p>
-
-      <div class="barra-container">
-        <div id="barra-progreso" class="barra-progreso"></div>
-      </div>
-    </div>
-
-    <hr>
+    </section>
 
     <!-- =========================
          CONCILIACIÓN
     ========================== -->
+    <section class="card">
 
-    <h2>Conciliación</h2>
+      <h2>Conciliación</h2>
 
-    <div id="detalle-diferencia" style="display:none" class="card-diferencia">
+      <div id="detalle-diferencia" style="display:none">
 
-      <h3>Detalle de diferencia</h3>
+        <h3>Detalle de diferencia</h3>
 
-      <label>Factura NO registrada (Folio fiscal SAT)</label>
-      <input type="text" id="factura">
+        <label>Factura NO registrada (Folio fiscal SAT)</label>
+        <input type="text" id="factura">
 
-      <label>Fecha</label>
-      <input type="date" id="fecha_factura">
+        <label>Fecha</label>
+        <input type="date" id="fecha_factura">
 
-      <label>Importe</label>
-      <input type="number" id="monto_factura">
-    </div>
+        <label>Importe</label>
+        <input type="number" id="monto_factura">
 
-    <button id="btn-guardar" onclick="guardarConciliacion()" disabled>
-      Guardar conciliación
-    </button>
+      </div>
 
-    <button id="btn-pdf" onclick="generarPDF()" disabled>
-      Descargar PDF
-    </button>
+      <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btn-guardar" onclick="guardarConciliacion()" disabled>
+          Guardar conciliación
+        </button>
+
+        <button id="btn-pdf" onclick="generarPDF()" disabled>
+          Descargar PDF
+        </button>
+      </div>
+
+    </section>
 
     <!-- =========================
          HISTORIAL
     ========================== -->
+    <section class="card">
 
-    <hr>
+      <h2>Historial de conciliaciones</h2>
 
-    <h2>Historial de conciliaciones</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Saldo Prestador</th>
+            <th>Diferencia</th>
+            <th>Factura Ref.</th>
+            <th>Importe Ref.</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-historial"></tbody>
+      </table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Saldo Prestador</th>
-          <th>Diferencia</th>
-          <th>Factura Ref.</th>
-          <th>Importe Ref.</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-historial"></tbody>
-    </table>
+    </section>
 
   </main>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script type="module" src="js/dashboard.js"></script>
 
