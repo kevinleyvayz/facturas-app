@@ -381,23 +381,6 @@ window.generarPDF = async function () {
   doc.text("Firma Autorizada", 150, 258);
 
   /* =========================
-     QR
-  ========================== */
-  const qrData = `Folio:${folio} | RFC:${rfc} | Diferencia:${diferencia}`;
-  const qrCanvas = document.createElement("div");
-
-  new QRCode(qrCanvas, {
-    text: qrData,
-    width: 80,
-    height: 80
-  });
-
-  const qrImg = qrCanvas.querySelector("img");
-  await new Promise(resolve => qrImg.onload = resolve);
-
-  doc.addImage(qrImg, "PNG", 15, 230, 35, 35);
-
-  /* =========================
      FOOTER
   ========================== */
   doc.setFontSize(8);
