@@ -2,41 +2,55 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Acceso Prestadores</title>
+  <title>Acceso Seguro</title>
+
+  <link rel="icon" type="image/png" href="img/logo.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
 
-  <div class="login-page">
-    <div class="login-box">
+<body class="login-body">
 
-      <img src="https://th.bing.com/th/id/OIP.8xrTea19bCLEl8DtswjEIAAAAA?w=232&h=185&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3" width="180" style="margin-bottom:20px;">
+  <div class="login-container">
+    <div class="login-card">
 
-      <h2>Acceso al sistema</h2>
+      <div class="login-header">
+        <h1>Portal de Conciliación</h1>
+        <p>Acceso exclusivo para prestadores OXXO</p>
+      </div>
 
-      <label>RFC</label>
-      <input 
-        type="text" 
-        id="rfc" 
-        placeholder="RFC"
-        oninput="this.value = this.value.toUpperCase()"
-      >
+      <div class="login-form">
 
-      <label>Contraseña</label>
-      <input type="password" id="password">
+        <label>RFC</label>
+        <input 
+          type="text" 
+          id="rfc" 
+          placeholder="Ingresa tu RFC"
+          oninput="this.value = this.value.toUpperCase()"
+        >
 
-      <button onclick="login()">Entrar</button>
+        <label>Contraseña</label>
 
-      <p id="mensaje" class="error"></p>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="••••••••">
+          <span id="togglePassword" class="toggle-password">👁</span>
+        </div>
+
+        <button onclick="login()" class="login-btn">
+          Iniciar sesión
+        </button>
+
+        <p id="mensaje" class="login-error"></p>
+
+      </div>
 
     </div>
   </div>
 
   <script type="module" src="js/auth.js"></script>
+
 </body>
 </html>
