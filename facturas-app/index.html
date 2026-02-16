@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso Prestadores</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="login-page">
+    <div class="login-box">
+
+      <img src="https://th.bing.com/th/id/OIP.8xrTea19bCLEl8DtswjEIAAAAA?w=232&h=185&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3" width="180" style="margin-bottom:20px;">
+
+      <h2>Acceso al sistema</h2>
+
+      <label>RFC</label>
+      <input 
+        type="text" 
+        id="rfc" 
+        placeholder="RFC"
+        oninput="this.value = this.value.toUpperCase()"
+      >
+
+      <label>Contraseña</label>
+      <input type="password" id="password">
+
+      <button onclick="login()">Entrar</button>
+
+      <p id="mensaje" class="error"></p>
+
+    </div>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>
