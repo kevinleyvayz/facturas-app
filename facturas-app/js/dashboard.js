@@ -332,12 +332,30 @@ async function cargarHistorial() {
   const ultima = data[0];
 
   if (ultima) {
-    diferenciaOriginal = Math.abs(Number(ultima.diferencia));
-    saldoPrestadorInput.value = Number(ultima.saldo_prestador).toFixed(2);
+
+  const diferenciaUltima = Number(ultima.diferencia);
+
+  diferenciaOriginal = Math.abs(diferenciaUltima);
+
+  saldoPrestadorInput.value =
+    Number(ultima.saldo_prestador).toFixed(2);
+
+  diferenciaInput.value =
+    diferenciaUltima.toFixed(2);
+
+  // 🔒 SOLO bloquear si ya está conciliado
+  if (diferenciaUltima === 0) {
     saldoPrestadorInput.disabled = true;
-    diferenciaInput.value = Number(ultima.diferencia).toFixed(2);
-    actualizarEstadoVisual(Number(ultima.diferencia));
+    botonGuardar.disabled = true;
+    detalle.style.display = "none";
+  } else {
+    saldoPrestadorInput.disabled = false;
+    botonGuardar.disabled = false;
+    detalle.style.display = "block";
   }
+
+  actualizarEstadoVisual(diferenciaUltima);
+}
 }
 
 await cargarHistorial();
