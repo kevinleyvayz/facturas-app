@@ -288,8 +288,6 @@ window.generarPDF = async function () {
   ========================== */
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-
-  doc.text("Folio: " + folio, 15, 45);
   doc.text("RFC: " + rfc, 15, 53);
   doc.text("Fecha: " + new Date().toLocaleDateString(), 15, 61);
 
@@ -363,22 +361,6 @@ window.generarPDF = async function () {
   } else {
     doc.text("No hay registros.", 18, y);
   }
-
-  /* =========================
-     MARCA DE AGUA
-  ========================== */
-  doc.setFontSize(50);
-  doc.setTextColor(230,230,230);
-  doc.text("OXXO", 60, 200, { angle: 45 });
-
-  doc.setTextColor(0,0,0);
-
-  /* =========================
-     FIRMA SIMULADA
-  ========================== */
-  doc.setFontSize(10);
-  doc.text("_____________________________", 140, 250);
-  doc.text("Firma Autorizada", 150, 258);
 
   /* =========================
      FOOTER
