@@ -1,3 +1,4 @@
+
 /* =========================
    VARIABLES
 ========================= */
@@ -12,7 +13,6 @@
   --azul: #2563eb;
   --blanco: #ffffff;
 }
-
 /* =========================
    RESET
 ========================= */
@@ -22,16 +22,13 @@
   padding: 0;
   font-family: "Inter", sans-serif;
 }
-
 body {
   background: var(--gris-bg);
   color: var(--gris-texto);
 }
-
 /* =====================================================
    LOGIN
 ===================================================== */
-
 .login-body {
   height: 100vh;
   background: linear-gradient(135deg, #8b1d18, #1f2937);
@@ -39,13 +36,11 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 .login-container {
   width: 100%;
   max-width: 400px;
   padding: 20px;
 }
-
 .login-card {
   background: var(--blanco);
   padding: 40px;
@@ -53,41 +48,34 @@ body {
   box-shadow: 0 25px 50px rgba(0,0,0,0.25);
   animation: fadeIn 0.5s ease;
 }
-
 .login-logo {
   text-align: center;
   margin-bottom: 20px;
 }
-
 .login-logo img {
   width: 120px;
   max-height: 100px;
   object-fit: contain;
 }
-
 .login-header h1 {
   font-size: 22px;
   margin-bottom: 5px;
 }
-
 .login-header p {
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 25px;
 }
-
 .input-group {
   margin-bottom: 18px;
   position: relative;
 }
-
 .input-group label {
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
 }
-
 .input-group input {
   width: 100%;
   padding: 12px;
@@ -96,13 +84,11 @@ body {
   font-size: 14px;
   transition: 0.2s;
 }
-
 .input-group input:focus {
   border-color: var(--azul);
   outline: none;
   box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
 }
-
 .password-group .toggle-password {
   position: absolute;
   right: 12px;
@@ -110,7 +96,6 @@ body {
   cursor: pointer;
   font-size: 14px;
 }
-
 .login-btn {
   width: 100%;
   padding: 12px;
@@ -122,17 +107,14 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
-
 .login-btn:hover {
   background: var(--vino-oscuro);
   transform: translateY(-2px);
 }
-
 .login-btn:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
-
 .login-error {
   margin-top: 12px;
   font-size: 13px;
@@ -140,11 +122,9 @@ body {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
 /* =====================================================
    DASHBOARD
 ===================================================== */
-
 .app-header {
   background: var(--vino);
   color: white;
@@ -153,11 +133,9 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 .app-header h1 {
   font-size: 18px;
 }
-
 .logout-btn {
   background: white;
   color: var(--vino);
@@ -167,11 +145,9 @@ body {
   cursor: pointer;
   font-weight: 600;
 }
-
 .logout-btn:hover {
   background: #f3f4f6;
 }
-
 .container {
   max-width: 1100px;
   margin: 30px auto;
@@ -180,11 +156,9 @@ body {
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
-
 /* =========================
    INPUTS
 ========================= */
-
 input {
   width: 100%;
   padding: 10px;
@@ -193,82 +167,67 @@ input {
   margin-bottom: 12px;
   font-size: 14px;
 }
-
 input:focus {
   border-color: var(--azul);
   outline: none;
 }
-
 input:disabled {
   background: #f3f4f6;
   color: #6b7280;
   font-weight: 600;
   cursor: not-allowed;
 }
-
 /* =========================
    TABLAS
 ========================= */
-
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
   font-size: 14px;
 }
-
 thead {
   background: var(--vino);
   color: white;
 }
-
 th {
   padding: 12px;
   text-align: left;
 }
-
 td {
   padding: 10px;
   border-bottom: 1px solid var(--gris-borde);
 }
-
 tbody tr:hover {
   background: #f9fafb;
 }
-
 /* =========================
    TARJETAS RESUMEN
 ========================= */
-
 .dashboard-resumen {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   margin-bottom: 25px;
 }
-
 .card {
   background: var(--blanco);
   padding: 20px;
   border-radius: 14px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.05);
 }
-
 .card h3 {
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 8px;
 }
-
 .card p {
   font-size: 20px;
   font-weight: 700;
 }
-
 /* =========================
    BARRA PROGRESO
 ========================= */
-
 .barra-container {
   width: 100%;
   height: 22px;
@@ -277,18 +236,15 @@ tbody tr:hover {
   overflow: hidden;
   margin-top: 10px;
 }
-
 .barra-progreso {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #3b82f6, #22c55e);
   transition: width 0.4s ease-in-out;
 }
-
 /* =========================
    MENSAJES ESTADO
 ========================= */
-
 .estado {
   margin-top: 15px;
   padding: 12px;
@@ -296,49 +252,39 @@ tbody tr:hover {
   font-weight: 600;
   text-align: center;
 }
-
 .estado.ok {
   background: #e6f4ea;
   color: #166534;
 }
-
 .estado.error {
   background: #fdecea;
   color: #b91c1c;
 }
-
 /* =========================
    ANIMACIONES
 ========================= */
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 /* HEADER MEJORADO */
-
 .header-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
 .header-logo {
   height: 40px;
 }
-
 /* Secciones */
 section.card {
   margin-bottom: 25px;
 }
-
 /* Estado texto */
 .estado {
   margin-top: 15px;
   font-weight: 600;
 }
-
 /* Botones dashboard */
 .container button {
   padding: 10px 18px;
@@ -350,11 +296,9 @@ section.card {
   color: white;
   transition: 0.3s;
 }
-
 .container button:hover {
   background: var(--vino-oscuro);
 }
-
 .container button:disabled {
   background: #ccc;
   cursor: not-allowed;
@@ -372,16 +316,13 @@ section.card {
   transition: all 0.3s ease;
   box-shadow: 0 8px 20px rgba(139, 29, 24, 0.3);
 }
-
 .login-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(139, 29, 24, 0.4);
 }
-
 .login-btn:active {
   transform: scale(0.97);
 }
-
 .login-btn:disabled {
   background: #ccc;
   box-shadow: none;
@@ -396,7 +337,6 @@ section.card {
   opacity: 0.6;
   transition: 0.2s;
 }
-
 .toggle-password:hover {
   opacity: 1;
 }
@@ -404,11 +344,9 @@ section.card {
   position: relative;
   width: 100%;
 }
-
 .password-wrapper input {
   padding-right: 40px; /* espacio para el ojo */
 }
-
 .toggle-password {
   position: absolute;
   right: 12px;
@@ -420,7 +358,6 @@ section.card {
   user-select: none;
   z-index: 10;
 }
-
 .toggle-password:hover {
   color: #111827;
 }
@@ -433,4 +370,289 @@ section.card {
 .bienvenida span {
   font-weight: 700;
   color: #d52b1e;
+}
+/* =========================
+   MODAL
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  width: 380px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  animation: aparecer 0.2s ease-out;
+}
+
+.modal h3 {
+  margin-top: 0;
+}
+
+.modal-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primario {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-secundario {
+  background-color: #e5e7eb;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@keyframes aparecer {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+#btnConfirmarCarga {
+  margin-top: 20px;
+}
+/* CONTENEDOR DE BOTONES */
+.acciones-conciliacion {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+/* ESTILO BASE */
+.btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Principal */
+.btn-principal {
+  background: #b91c1c;
+  color: white;
+}
+
+.btn-principal:hover {
+  background: #991b1b;
+  transform: translateY(-2px);
+}
+
+/* Secundario */
+.btn-secundario {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-secundario:hover {
+  background: #cbd5e1;
+}
+
+/* Éxito */
+.btn-exito {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-exito:hover {
+  background: #15803d;
+  transform: translateY(-2px);
+}
+
+/* Outline */
+.btn-outline {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+}
+/* =========================
+   BOTONES GENERALES
+========================= */
+
+.btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Verde principal */
+.btn-exito {
+  background: #16a34a;
+  color: white;
+}
+
+/* Azul */
+.btn-azul {
+  background: #2563eb;
+  color: white;
+}
+
+/* Gris */
+.btn-gris {
+  background: #64748b;
+  color: white;
+}
+
+/* Rojo */
+.btn-rojo {
+  background: #dc2626;
+  color: white;
+}
+
+/* Verde confirmación */
+.btn-verde {
+  background: #22c55e;
+  color: white;
+}
+
+/* Outline */
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+/* =========================
+   ACCIONES CONCILIACIÓN
+========================= */
+
+.acciones-conciliacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.acciones-secundarias {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+/* =========================
+   ACCIONES CONCILIACIÓN
+========================= */
+
+.acciones-secundarias {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#previewExcel,
+#previewExcel th,
+#previewExcel td {
+    color: #2c3e50 !important;
+}
+
+#previewExcel th {
+    background-color: #f4f6f9 !important;
+    color: #1a1a1a !important;
+    font-weight: 600;
+}
+
+#previewExcel td {
+    background-color: #ffffff !important;
+}
+.btn-danger {
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #a93226;
+}
+/* Progreso */
+.progreso-carga {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+.acciones-secundarias {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.barra-acciones{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.acciones-derecha{
+  display: flex;
+  gap: 10px;
+}
+
+#btnConfirmarCarga{
+  display: block;
+}
+.preview-container table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-container th{
+  background-color: #f1f3f5;
+  color: #333;
+  text-align: left;
+  padding: 8px;
+  border-bottom: 2px solid #ddd;
+}
+
+.preview-container td{
+  padding: 8px;
+  border-bottom: 1px solid #eee;
 }
