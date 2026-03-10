@@ -4,16 +4,16 @@ const supabase = createClient(
   "https://vfaysxbuohhwbadyorvd.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmYXlzeGJ1b2hod2JhZHlvcnZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDc1ODksImV4cCI6MjA4NTI4MzU4OX0.8dLJ42afWgmqsxEGufS2bkvsxcacveZ-idt-KMLN5ww"
 );
-// 🔐 Verificar sesión
+// Verificar sesión
 const {
   data: { user }
 } = await supabase.auth.getUser();
 if (!user) {
   window.location.href = "index.html";
 }
-// 📌 Obtener RFC del usuario
+// Obtener RFC del usuario
 const rfcUsuario = user.email.split("@")[0];
-// 🧾 Cargar facturas (SIN filtro todavía)
+// Cargar facturas
 async function cargarFacturas() {
   const { data, error } = await supabase
     .from("facturas")
@@ -38,7 +38,7 @@ async function cargarFacturas() {
     tabla.appendChild(fila);
   });
 }
-// ➕ Registrar factura
+// Registrar factura
 window.registrarFactura = async function () {
   const transaccion = document.getElementById("transaccion").value;
   const numeroFactura = document.getElementById("numero_factura").value;
@@ -62,5 +62,6 @@ window.registrarFactura = async function () {
     cargarFacturas();
   }
 };
-// 🚀 Cargar al entrar
+// Cargar al entrar
+
 cargarFacturas();
