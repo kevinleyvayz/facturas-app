@@ -257,6 +257,7 @@ saldoPrestadorInput.addEventListener("input", () => {
    GUARDAR CONCILIACIÓN
 ========================= */
 window.guardarConciliacion = async function () {
+  
   const confirmar = await mostrarModal(
   "Confirmar conciliación",
   "¿Deseas registrar esta conciliación?"
@@ -287,6 +288,26 @@ if (!confirmar) return;
     await mostrarModal("Debes capturar factura, fecha e importe.");
     return;
   }
+
+  /* =========================
+    VALIDAR DUPLICADO EN facturas_excel
+  ========================= */
+
+  const { data: facturaDuplicada, error: errorBusqueda } = await supabase
+    .from("facturas_excel")
+    .select("numero_factura")
+    .eq("numero_factura", factura)
+    .maybeSingle();
+
+  if (facturaDuplicada) {
+    await mostrarModal(
+      "Factura duplicada",
+      "Este número de factura ya existe en el sistema OXXO.",
+      "error"
+    );
+    return;
+  }
+
   let nuevaDiferencia = diferenciaBase - montoFactura;
   if (nuevaDiferencia < 0) nuevaDiferencia = 0;
   const { error } = await supabase
@@ -327,135 +348,447 @@ if (!confirmar) return;
   document.getElementById("monto_factura").value = "";
   await cargarHistorial();
 };
+
 /* =========================
-   GENERAR PDF
+GENERAR PDF
 ========================= */
+
 window.generarPDF = async function () {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const saldoOxxo = document.getElementById("saldo_ap").value;
-  const saldoPrestador = saldoPrestadorInput.value;
-  const diferencia = diferenciaInput.value;
-  const folio = "CN-" + Date.now();
-  const { data } = await supabase
-    .from("conciliacion_prestador")
-    .select("*")
-    .eq("rfc", rfc)
-    .order("created_at", { ascending: false });
-  /* =========================
-     ENCABEZADO ROJO
-  ========================== */
-  doc.setFillColor(180, 0, 0);
-  doc.rect(0, 0, 210, 30, "F");
-  const logo = new Image();
-  logo.src = "img/logo.png";
-  await new Promise(resolve => logo.onload = resolve);
-  doc.addImage(logo, "PNG", 15, 7, 35, 15);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("REPORTE DE CONCILIACIÓN", 105, 18, { align: "center" });
-  doc.setTextColor(0,0,0);
-  /* =========================
-     INFO GENERAL
-  ========================== */
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.text("RFC: " + rfc, 15, 53);
-  doc.text("Fecha: " + new Date().toLocaleDateString(), 15, 61);
-  /* =========================
-     RESUMEN EN CAJA
-  ========================== */
-  doc.setDrawColor(200);
-  doc.rect(15, 70, 180, 35);
-  doc.text("Saldo OXXO: $" + saldoOxxo, 20, 82);
-  doc.text("Saldo Prestador: $" + saldoPrestador, 20, 90);
-  doc.text("Diferencia Final: $" + diferencia, 20, 98);
-  /* =========================
-     ESTADO GRANDE
-  ========================== */
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  if (Number(diferencia) === 0) {
-    doc.setTextColor(22,163,74);
-    doc.text("ESTADO: CONCILIADO", 120, 90);
-  } else {
-    doc.setTextColor(220,38,38);
-    doc.text("ESTADO: PENDIENTE", 120, 90);
-  }
-  doc.setTextColor(0,0,0);
-  /* =========================
-     TABLA DETALLE
-  ========================== */
-  let y = 120;
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Detalle de Conciliaciones", 15, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  // Encabezados
-  doc.setFillColor(240);
-  doc.rect(15, y-5, 180, 8, "F");
-  doc.text("Fecha", 18, y);
-  doc.text("Factura", 55, y);
-  doc.text("Importe", 110, y);
-  doc.text("Diferencia", 150, y);
-  y += 10;
-  if (data && data.length > 0) {
-    data.forEach(reg => {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(reg.created_at?.substring(0,10) || "", 18, y);
-      doc.text(reg.factura_referencia || "-", 55, y);
-      doc.text("$" + Number(reg.monto_factura || 0).toFixed(2), 110, y);
-      doc.text("$" + Number(reg.diferencia).toFixed(2), 150, y);
-      y += 8;
-    });
-  } else {
-    doc.text("No hay registros.", 18, y);
-  }
-  /* =========================
-     FOOTER
-  ========================== */
-  doc.setFontSize(8);
-  doc.text(
-    "Documento generado automáticamente por el Portal de Conciliación.",
-    105,
-    285,
-    { align: "center" }
-  );
-  doc.save("Conciliacion_" + rfc + ".pdf");
-};
 
-function resetEstadoConciliacion() {
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({ unit: "mm", format: "letter" });
 
-  diferenciaOriginal = null;
+const margin = 20;
+const pageWidth = doc.internal.pageSize.getWidth();
+let y = 30;
 
-  saldoPrestadorInput.disabled = false;
-  saldoPrestadorInput.value = "";
+/* =========================
+FECHAS
+========================= */
 
-  diferenciaInput.value = "";
+const selector = document.getElementById("selectorMes");
 
-  botonGuardar.disabled = true;
-  botonGuardar.innerText = "Guardar conciliación";
-  botonGuardar.style.backgroundColor = "";
+if (!selector || !selector.value) {
+alert("Selecciona un mes antes de generar el PDF.");
+return;
+}
 
-  detalle.style.display = "none";
+const [anio, mes] = selector.value.split("-");
+const fechaCorte = new Date(anio, mes, 0);
 
-  barra.style.width = "0%";
+const ultimoDia = fechaCorte.getDate();
+const nombreMes = fechaCorte.toLocaleDateString("es-MX",{month:"long"});
 
-  mensajeEstado.innerText = "Pendiente de conciliación";
-  mensajeEstado.style.color = "#dc2626";
+const fechaRegistro = new Date().toLocaleDateString("es-MX",{
+year:"numeric",
+month:"long",
+day:"numeric"
+});
 
-  if (botonSubir) {
-    botonSubir.style.pointerEvents = "auto";
-    botonSubir.style.opacity = "1";
-  }
+const nombrePrestador = document.getElementById("rfcUsuario").textContent;
+const saldoPrestador = document.getElementById("saldo_prestador").value || 0;
+const diferencia = Number(diferenciaInput.value || 0);
+
+
+/* =========================
+CONSULTA HISTORIAL
+========================= */
+
+const { data } = await supabase
+.from("conciliacion_prestador")
+.select("*")
+.eq("rfc", rfc)
+.order("created_at", { ascending: false });
+
+
+/* =========================
+LOGO
+========================= */
+
+const logo = new Image();
+logo.src = "img/logo.png";
+await new Promise(resolve => logo.onload = resolve);
+
+/* logo más grande y natural */
+doc.addImage(logo,"PNG",margin,15,45,18);
+
+
+/* =========================
+UBICACIÓN (DERECHA)
+========================= */
+
+doc.setFont("times","bold");
+doc.setFontSize(11);
+
+doc.text(
+"Blvd. Lázaro Cardenas #4300",
+pageWidth-margin,
+22,
+{align:"right"}
+);
+
+doc.text(
+"Fracc. Valle del Pedregal",
+pageWidth-margin,
+27,
+{align:"right"}
+);
+
+doc.text(
+"Mexicali, B.C. C.P. 21395",
+pageWidth-margin,
+32,
+{align:"right"}
+);
+
+doc.text(
+"Tel: 561-53-00",
+pageWidth-margin,
+37,
+{align:"right"}
+);
+
+y = 55;
+
+
+/* =========================
+FECHA
+========================= */
+
+doc.setFont("times","bold");
+
+doc.text(
+"Mexicali, B.C. a " + fechaRegistro,
+pageWidth - margin,
+y,
+{align:"right"}
+);
+
+y+=15;
+
+
+/* =========================
+ASUNTO
+========================= */
+
+doc.setFont("times","bold");
+doc.setFontSize(12);
+
+doc.text(
+"ASUNTO: Solicitud de Confirmación de Saldo",
+margin,
+y
+);
+
+y+=12;
+
+
+/* =========================
+EMPRESA
+========================= */
+
+doc.setFont("times","bold");
+
+doc.text(
+"EMPRESA: " + nombrePrestador,
+margin,
+y
+);
+
+y+=10;
+
+doc.setFont("times","normal");
+
+doc.text(
+"Atención: Departamento de Crédito y Cobranza",
+margin,
+y
+);
+
+y+=15;
+
+
+/* =========================
+PÁRRAFOS
+========================= */
+
+doc.setFont("times","normal");
+doc.setFontSize(11);
+
+doc.text(
+"Nuestro Departamento de Auditoria Interna está auditando nuestros Estados Financieros y requieren la",
+margin,
+y
+);
+
+y+=6;
+
+doc.text(
+"confirmación del importe que le adeudamos al " +
+ultimoDia + " de " +
+nombreMes + " de " +
+anio + ".",
+margin,
+y
+);
+
+y+=12;
+
+doc.text(
+"Por lo anterior solicitamos de la manera más atenta anotar el saldo que muestran sus registros contables",
+margin,
+y
+);
+
+y+=6;
+
+doc.text(
+"a la fecha indicada, así como firmar esta solicitud en el espacio indicado y devolverla vía correo electrónico",
+margin,
+y
+);
+
+y+=6;
+
+
+/* =========================
+ENCARGADO
+========================= */
+
+doc.setFont("times","bold");
+
+doc.text(
+"Guillermo Javier Sánchez Chacón",
+margin,
+y
+);
+
+y+=6;
+
+doc.setFont("times","normal");
+
+doc.text(
+"Enc. Cuentas por Pagar Región Pacífico Norte",
+margin,
+y
+);
+
+y+=6;
+
+doc.text(
+"guillermo.sanchez@oxxo.com",
+margin,
+y
+);
+
+y+=18;
+
+
+/* =========================
+SALDO
+========================= */
+
+doc.setFont("times","bold");
+
+doc.text(
+"Saldo de la Cuenta a la Fecha Solicitada: $" +
+Number(saldoPrestador).toFixed(2),
+margin,
+y
+);
+
+y+=10;
+
+doc.setFont("times","normal");
+
+doc.text(
+"El saldo antes descrito es el importe que nos adeuda CADENA COMERCIAL OXXO S.A. DE C.V.",
+margin,
+y
+);
+
+y+=6;
+
+doc.text(
+"a la fecha solicitada.",
+margin,
+y
+);
+
+y+=10;
+
+doc.text(
+"Favor de anexar copia del estado de cuenta que soporte la integración del saldo.",
+margin,
+y
+);
+
+y+=25;
+
+
+/* =========================
+FIRMAS
+========================= */
+
+doc.setFont("times","normal");
+
+/* sello */
+
+doc.text("Sello:", margin, y);
+doc.rect(margin+15,y-6,60,28);
+
+y+=38;
+
+/* firma */
+
+doc.text("Nombre y Firma:", margin, y);
+doc.line(margin+40,y,margin+120,y);
+
+y+=12;
+
+doc.text("Cargo:", margin, y);
+doc.line(margin+20,y,margin+100,y);
+
+y+=12;
+
+if (y > 250) {
+  doc.addPage();
+  y = 30;
+}
+
+/* =========================
+ESTADO
+========================= */
+
+doc.setFont("times","bold");
+doc.setFontSize(12);
+
+if(diferencia === 0){
+
+doc.setTextColor(0,140,0);
+doc.text("ESTADO: CONCILIADO", margin, y);
+
+}else{
+
+doc.setTextColor(200,0,0);
+doc.text("ESTADO: NO CONCILIADO", margin, y);
 
 }
+
+doc.setTextColor(0,0,0);
+
+y += 12;
+
+
+/* =========================
+TITULO HISTORIAL
+========================= */
+
+doc.setFont("times","bold");
+doc.setFontSize(12);
+
+doc.text("Historial de Facturas Registradas", margin, y);
+
+y += 5;
+
+
+/* =========================
+PREPARAR DATOS TABLA
+========================= */
+
+let tabla = [];
+
+if(data && data.length > 0){
+
+data.forEach(reg=>{
+
+tabla.push([
+reg.created_at?.substring(0,10) || "",
+reg.factura_referencia || "-",
+"$" + Number(reg.monto_factura || 0).toFixed(2),
+"$" + Number(reg.diferencia || 0).toFixed(2)
+]);
+
+});
+
+}
+
+
+/* =========================
+TABLA PROFESIONAL
+========================= */
+
+doc.autoTable({
+
+startY: y + 5,
+
+head: [[
+"Fecha",
+"Folio de Factura",
+"Importe",
+"Diferencia"
+]],
+
+body: tabla,
+
+theme: "grid",
+
+styles:{
+font:"times",
+fontSize:10
+},
+
+headStyles:{
+fillColor:[196,18,18], 
+textColor:255,
+fontStyle:"bold",
+halign:"center"
+},
+
+alternateRowStyles:{
+fillColor:[248,248,248]
+},
+
+columnStyles:{
+2:{halign:"right"},
+3:{halign:"right"}
+},
+
+margin: { top: 30, left: margin, right: margin },
+
+});
+
+
+/* =========================
+PAGINACIÓN
+========================= */
+
+const pages = doc.internal.getNumberOfPages();
+
+for(let i=1;i<=pages;i++){
+
+doc.setPage(i);
+
+doc.setFontSize(8);
+
+doc.text(
+"Página "+i+" de "+pages,
+pageWidth-35,
+275
+);
+
+doc.text(
+"OXXO | Uso Interno",
+pageWidth/2,
+275,
+{align:"center"}
+);
+
+}
+
+doc.save("Confirmacion_Saldos_"+rfc+".pdf");
+
+};
 
 /* =========================
    CARGAR HISTORIAL
@@ -487,7 +820,7 @@ async function cargarHistorial() {
     btnEliminarTodas.style.display = "none";
   }
 
-  // 🔓 RESET TOTAL
+  // RESET TOTAL
   diferenciaOriginal = null;
   saldoPrestadorInput.disabled = false;
   saldoPrestadorInput.value = "";
@@ -532,7 +865,7 @@ if (data && data.length > 0) {
     btnEliminarTodas.style.display = "inline-block";
   }
 
-  // 🔥 recalcular diferencia real
+  //  recalcular diferencia real
 
   const saldoOxxo =
     Number(document.getElementById("saldo_ap").value) || 0;
@@ -586,7 +919,7 @@ if (data && data.length > 0) {
 
 else {
 
-  // 🔓 NO HAY CONCILIACIONES → DESBLOQUEAR
+  // NO HAY CONCILIACIONES → DESBLOQUEAR
   diferenciaOriginal = null;
   saldoPrestadorInput.disabled = false;
   saldoPrestadorInput.value = "";
@@ -649,7 +982,7 @@ for (let reg of registros) {
 
 if (diferenciaActual < 0) diferenciaActual = 0;
 
-// 🔥 SOLO actualizamos el último registro
+// SOLO actualizamos el último registro
 const ultimoId = registros[registros.length - 1].id;
 
   await supabase
@@ -803,7 +1136,7 @@ function mostrarVistaPrevia(data) {
   `;
 
   // Mostrar botón confirmar (lo dejamos como lo tienes)
-  document.getElementById("btnConfirmarCarga").style.display = "inline-block";
+  document.getElementById("accionesExcel").style.display = "flex";
 }
 
 /* =========================
@@ -859,6 +1192,22 @@ window.confirmarCargaExcel = async function () {
 
   for (let row of facturasExcel) {
 
+      // VALIDAR DUPLICADO EN facturas_excel
+  const { data: facturaDuplicada } = await supabase
+    .from("facturas_excel")
+    .select("numero_factura")
+    .eq("numero_factura", row.factura_referencia)
+    .maybeSingle();
+
+  if (facturaDuplicada) {
+    await mostrarModal(
+      "Factura duplicada detectada",
+      `La factura ${row.factura_referencia} ya existe en el sistema.`,
+      "error"
+    );
+    return;
+  }
+
     const monto = parseFloat(
       String(row.monto_factura).replace(/[^0-9.-]+/g, "")
     ) || 0;
@@ -898,7 +1247,7 @@ window.confirmarCargaExcel = async function () {
   actualizarEstadoVisual(0);
 
   document.getElementById("previewExcel").innerHTML = "";
-  document.getElementById("btnConfirmarCarga").style.display = "none";
+  document.getElementById("accionesExcel").style.display = "none";
 
   await cargarHistorial();
 };
@@ -938,8 +1287,114 @@ window.eliminarTodasFacturas = async function () {
   "success"
 );
 
-// 🔥 RESET VISUAL COMPLETO
-resetEstadoConciliacion();
+const inputExcel = document.getElementById("inputExcel");
+if (inputExcel) {
+  inputExcel.value = "";
+}
 
 await cargarHistorial();
+};
+// ==============================
+// FECHA DE CORTE AUTOMÁTICA
+// ==============================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const inputMes = document.getElementById("selectorMes");
+
+  // Cargar mes actual automáticamente
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  inputMes.value = `${anio}-${mes}`;
+
+  actualizarFechaCorte();
+
+  inputMes.addEventListener("change", actualizarFechaCorte);
+
+});
+
+function actualizarFechaCorte() {
+
+  const inputMes = document.getElementById("selectorMes");
+  const valor = inputMes.value;
+
+  if (!valor) return;
+
+  const [anio, mes] = valor.split("-");
+
+  // Último día del mes seleccionado
+  const fechaCorte = new Date(anio, mes, 0);
+
+  const opciones = { year: "numeric", month: "long", day: "numeric" };
+
+  const fechaFormateada =
+    fechaCorte.toLocaleDateString("es-MX", opciones);
+
+  document.getElementById("fechaConfirmacion").innerText =
+    "Confirmación de saldos al " + fechaFormateada;
+}
+
+function obtenerUltimoDiaMes(valorMes) {
+  const [anio, mes] = valorMes.split("-");
+  return new Date(anio, mes, 0).getDate();
+}
+
+function formatearFechaActual() {
+  const hoy = new Date();
+  return hoy.toLocaleDateString("es-MX", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+}
+/* =========================
+   BUSCADOR FACTURAS
+========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const buscador = document.getElementById("buscadorFacturas");
+  const tabla = document.getElementById("tablaFacturas");
+  const tbody = document.getElementById("tabla-facturas");
+  const contador = document.getElementById("contadorFacturas");
+
+  if (!buscador) return;
+
+  buscador.addEventListener("keyup", function () {
+
+    const filtro = this.value.toLowerCase();
+    const filas = tbody.querySelectorAll("tr");
+
+    let visibles = 0;
+
+    filas.forEach(fila => {
+      const texto = fila.textContent.toLowerCase();
+
+      if (texto.includes(filtro)) {
+        fila.style.display = "";
+        visibles++;
+      } else {
+        fila.style.display = "none";
+      }
+    });
+
+    contador.textContent = `Mostrando ${visibles} de ${filas.length} facturas`;
+
+  });
+
+});
+
+window.cancelarCargaExcel = function(){
+
+const input = document.getElementById("inputExcel");
+const preview = document.getElementById("previewExcel");
+const acciones = document.getElementById("accionesExcel");
+
+if(input) input.value = "";
+
+if(preview) preview.innerHTML = "";
+
+if(acciones) acciones.style.display = "none";
+
 };
