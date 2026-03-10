@@ -636,9 +636,6 @@ section.card {
   gap: 10px;
 }
 
-#btnConfirmarCarga{
-  display: block;
-}
 .preview-container table{
   width: 100%;
   border-collapse: collapse;
@@ -655,4 +652,328 @@ section.card {
 .preview-container td{
   padding: 8px;
   border-bottom: 1px solid #eee;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.fecha-corte {
+  text-align: right;
+  font-size: 13px;
+}
+
+#fechaConfirmacion {
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+#selectorMes {
+  padding: 4px;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.usuario-box, .corte-box {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.label-mini {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.usuario-nombre {
+  font-size: 14px;
+}
+
+.input-mes {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 2px;
+}
+
+.fecha-confirmacion {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 3px;
+}
+/* =========================
+   HEADER OXXO CORPORATIVO
+========================= */
+
+.app-header {
+  background: linear-gradient(90deg, #9d0000 0%, #c40000 100%);
+  color: white;
+  padding: 20px 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  border-bottom: 4px solid #ffcc00; /* Amarillo OXXO */
+}
+
+/* LADO IZQUIERDO */
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.header-logo {
+  height: 52px;
+}
+
+.titulo-box h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.subtitulo {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* LADO DERECHO */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+/* TARJETAS USUARIO Y FECHA */
+
+.usuario-box,
+.corte-box {
+  background: rgba(255,255,255,0.15);
+  padding: 10px 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.label-mini {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ffdd55; /* Amarillo */
+  margin-bottom: 5px;
+}
+
+.usuario-nombre {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+/* SELECTOR MES */
+
+.input-mes {
+  background: white;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.input-mes:hover {
+  transform: scale(1.05);
+}
+
+.input-mes:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,204,0,0.5);
+}
+
+/* BOTÓN CERRAR SESIÓN */
+
+.logout-btn {
+  background: #ffffff;
+  color: #9d0000;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: white;
+}
+/* =========================
+   BUSCADOR FACTURAS
+========================= */
+
+.facturas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.facturas-controles {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#buscadorFacturas {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 250px;
+  transition: 0.2s ease;
+}
+
+#buscadorFacturas:focus {
+  outline: none;
+  border-color: #e10600;
+  box-shadow: 0 0 0 2px rgba(225,6,0,0.2);
+}
+
+.contador {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+/* =========================
+   LOGIN - FONDO DIFUMINADO
+========================= */
+
+.login-body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Imagen de fondo */
+.login-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('../img/fondo.jpg') center center / cover no-repeat;
+  filter: blur(10px);
+  transform: scale(1.1);
+  z-index: -2;
+}
+
+/* Capa oscura encima para que el texto se lea perfecto */
+.login-body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(180, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.65)
+  );
+  z-index: -1;
+}
+
+/* =========================
+   LOGIN CARD PREMIUM
+========================= */
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
+  padding: 40px;
+  width: 360px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.6s ease;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.btn-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.btn-loading::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid white;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+.acciones-excel{
+display:flex;
+gap:10px;
+margin-top:15px;
+justify-content:flex-end;
+}
+/* barra principal de acciones */
+.barra-acciones{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+/* botones del lado derecho */
+.acciones-derecha{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* botones confirmar / cancelar */
+.acciones-excel{
+  width:100%;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:15px;
 }
