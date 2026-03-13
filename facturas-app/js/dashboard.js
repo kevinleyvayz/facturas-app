@@ -400,6 +400,15 @@ const { data } = await supabase
 .eq("rfc", rfc)
 .order("created_at", { ascending: false });
 
+/* =========================
+CONSULTA FACTURAS OXXO
+========================= */
+
+const { data: facturasOxxo } = await supabase
+.from("facturas_excel")
+.select("fecha, numero_factura, monto")
+.eq("rfc", rfc)
+.order("fecha", { ascending: true });
 
 /* =========================
 LOGO
@@ -679,6 +688,88 @@ doc.setTextColor(0,0,0);
 
 y += 12;
 
+/* =========================
+TITULO FACTURAS SISTEMA OXXO
+========================= */
+
+doc.setFont("times","bold");
+doc.setFontSize(12);
+
+doc.text("Detalle de Facturas en Sistema OXXO:", margin, y);
+
+y += 5;
+
+
+/* =========================
+PREPARAR DATOS TABLA OXXO
+========================= */
+
+let tablaOxxo = [];
+let totalOxxo = 0;
+
+if(facturasOxxo && facturasOxxo.length > 0){
+
+facturasOxxo.forEach(f => {
+
+const monto = Number(f.monto || 0);
+
+totalOxxo += monto;
+
+tablaOxxo.push([
+f.fecha || "",
+f.numero_factura || "-",
+"$" + monto.toFixed(2)
+]);
+
+});
+
+}
+
+
+/* =========================
+TABLA FACTURAS OXXO
+========================= */
+
+doc.autoTable({
+
+startY: y + 5,
+
+head: [[
+"Fecha",
+"Factura",
+"Importe"
+]],
+
+body: tablaOxxo,
+
+theme: "grid",
+
+styles:{
+font:"times",
+fontSize:10
+},
+
+headStyles:{
+fillColor:[196,18,18],
+textColor:255,
+fontStyle:"bold",
+halign:"center"
+},
+
+alternateRowStyles:{
+fillColor:[248,248,248]
+},
+
+columnStyles:{
+2:{halign:"right"}
+},
+
+margin: { top: 30, left: margin, right: margin },
+
+});
+
+y = doc.lastAutoTable.finalY + 15;
+
 
 /* =========================
 TITULO HISTORIAL
@@ -687,7 +778,7 @@ TITULO HISTORIAL
 doc.setFont("times","bold");
 doc.setFontSize(12);
 
-doc.text("Historial de Facturas Registradas", margin, y);
+doc.text("Facturas pendientes por registrar enviadas por el prestador:", margin, y);
 
 y += 5;
 
@@ -697,15 +788,20 @@ PREPARAR DATOS TABLA
 ========================= */
 
 let tabla = [];
+let totalPrestador = 0;
 
 if(data && data.length > 0){
 
-data.forEach(reg=>{
+  data.forEach(reg=>{
+
+const monto = Number(reg.monto_factura || 0);
+
+totalPrestador += monto;
 
 tabla.push([
 reg.created_at?.substring(0,10) || "",
 reg.factura_referencia || "-",
-"$" + Number(reg.monto_factura || 0).toFixed(2),
+"$" + monto.toFixed(2),
 "$" + Number(reg.diferencia || 0).toFixed(2)
 ]);
 
@@ -758,6 +854,74 @@ margin: { top: 30, left: margin, right: margin },
 
 });
 
+y = doc.lastAutoTable.finalY + 12;
+
+/* =========================
+RESUMEN DE CONCILIACIÓN
+========================= */
+
+const diferenciaFinal = Number(saldoPrestador) - totalOxxo;
+
+doc.setFont("times","bold");
+doc.setFontSize(12);
+
+doc.text("Resumen de Conciliación", margin, y);
+
+y += 5;
+
+/* datos tabla resumen */
+
+const tablaResumen = [
+
+[
+"Total Sistema OXXO",
+"$" + totalOxxo.toFixed(2)
+],
+
+[
+"Saldo Reportado por Prestador",
+"$" + Number(saldoPrestador).toFixed(2)
+],
+
+[
+"Diferencia Final",
+"$" + diferenciaFinal.toFixed(2)
+]
+
+];
+
+doc.autoTable({
+
+startY: y + 3,
+
+head: [[
+"Concepto",
+"Importe"
+]],
+
+body: tablaResumen,
+
+theme: "grid",
+
+styles:{
+font:"times",
+fontSize:11
+},
+
+headStyles:{
+fillColor:[60,60,60],
+textColor:255,
+fontStyle:"bold",
+halign:"center"
+},
+
+columnStyles:{
+1:{halign:"right"}
+},
+
+margin:{ left: margin, right: margin }
+
+});
 
 /* =========================
 PAGINACIÓN
@@ -786,13 +950,86 @@ pageWidth/2,
 
 }
 
+await generarExcelConciliacion();
 doc.save("Confirmacion_Saldos_"+rfc+".pdf");
 
 };
 
 /* =========================
+EXCEL AUDITORIA
+========================= */
+
+async function generarExcelConciliacion(){
+
+const saldoOxxo = Number(document.getElementById("saldo_ap").value || 0);
+const saldoUsuario = Number(document.getElementById("saldo_prestador").value || 0);
+const diferencia = saldoUsuario - saldoOxxo;
+
+const prestador = document.getElementById("rfcUsuario").textContent;
+
+const { data: cuentaData } = await supabase
+.from("facturas_excel")
+.select("cuenta")
+.eq("rfc", rfc)
+.limit(1);
+
+const cuenta = cuentaData?.[0]?.cuenta || "";
+
+const selector = document.getElementById("selectorMes");
+const [anio, mes] = selector.value.split("-");
+
+const fechaHoy = new Date();
+const ultimoDiaMes = new Date(anio, mes, 0);
+
+const fechaTexto = fechaHoy.toLocaleDateString("es-MX");
+const ultimoDiaTexto = ultimoDiaMes.toLocaleDateString("es-MX");
+
+
+/* cargar plantilla */
+
+const response = await fetch("/excel/plantilla_conciliacion.xlsx");
+const buffer = await response.arrayBuffer();
+
+const workbook = new ExcelJS.Workbook();
+await workbook.xlsx.load(buffer);
+
+const sheet = workbook.worksheets[0];
+
+
+/* escribir valores SIN romper formato */
+
+sheet.getCell("C5").value = prestador;
+sheet.getCell("C8").value = cuenta;
+sheet.getCell("E8").value = fechaTexto;
+
+sheet.getCell("C11").value = ultimoDiaTexto;
+
+sheet.getCell("B16").value = fechaTexto;
+sheet.getCell("B17").value = fechaTexto;
+sheet.getCell("B18").value = fechaTexto;
+
+sheet.getCell("B31").value = prestador;
+
+sheet.getCell("F16").value = saldoOxxo;
+sheet.getCell("E17").value = saldoUsuario;
+sheet.getCell("F18").value = diferencia;
+
+
+/* descargar */
+
+const blob = await workbook.xlsx.writeBuffer();
+
+const link = document.createElement("a");
+link.href = URL.createObjectURL(new Blob([blob]));
+link.download = "Caratula_Conciliacion_"+prestador+".xlsx";
+link.click();
+
+}
+
+/* =========================
    CARGAR HISTORIAL
 ========================= */
+
 async function cargarHistorial() {
   const { data } = await supabase
     .from("conciliacion_prestador")
